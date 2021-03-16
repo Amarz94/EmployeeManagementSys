@@ -78,7 +78,6 @@ function startUp() {
                     const actSel7 = "DELETE ROLE";
                     RolesArrQuery.getQueryNoRepeats(deleteRole, actSel7);
                     break;
-                // return removeRole();
 
                 case commMenChoices[0]:
                     return AllDep();
@@ -127,6 +126,22 @@ function addEmp(emp_info, managerObjArr) {
     })
 }
 
+function deleteEmp(firstName, lastName, employeeID) {
+    console.log("You selected employee delete.")
+
+    const quDel = "DELETE FROM employee WHERE employee.id = (?);"
+    const conDel = new InquirerFunctions(inqSel[2], 'confirm_choice', questions.deleteEmployee2 + firstName + " " + lastName + "?", ["yes", "no"]);
+    const delQuery = new SQLquery(quDel, employeeID);
+
+    inquirer.prompt([conDel.ask()]).then(respObj => {
+        if (respObj.confirm_choice === "yes") {
+            delQuery.delete(startUp);
+        } else {
+            startUp();
+        }
+    })
+}
+
 function addRole() {
 
     const queryDeps = "SELECT department.name FROM department;"
@@ -161,5 +176,81 @@ function addRole() {
                 })
             })
         })
+    })
+}
+
+function deleteRole(compRolesArr) {
+
+    console.log("You entered role delete")
+
+    const wRole = new InquirerFunctions(inqSel[2], 'role_to_delete', questions.deleteRole, compRolesArr);
+    inquirer.prompt([wRole.ask()]).then(userChoice => {
+
+        const role_id_Query = `SELECT role.id FROM role WHERE role.title = (?);`
+        connection.query(role_id_Query, userChoice.role_to_delete, function (err, res) {
+
+            const roleDelID = res[0].id;
+            const roleDelTit = userChoice.role_to_delete;
+
+            if (res.length > 1) {
+                console.log("Role found in multiple departments!");
+
+                const departWRolequery = `SELECT department.name, role.department_id
+                                                FROM department
+                                                INNER JOIN role on role.department_id = department.id AND role.title = (?);`
+
+                connection.query(departWRolequery, userChoice.role_to_delete, function (err, res) {
+                    if (err) throw err
+                    const departWRoleArr = [];
+                    for (let department of res) {
+                        departWRoleArr.push(department);
+                    }
+
+                    const wDepar = new InquirerFunctions(inqSel[2], 'department_to_delete_Role_From', questions.departmentDeleteRole, departmentsWithRoleArr);
+
+                    inquirer.prompt([wDepar.ask()]).then(userChoice => {
+                        console.log(res);
+                        const departName_ID_Arr = res.filter(department => {
+                            if (department.name == userChoice.department_to_delete_Role_From) {
+                                return true;
+                            }
+                        })
+
+                        delRoleQuery2 = "DELETE FROM role WHERE role.title = (?) AND role.department_id = (?)"
+                        const delInstance2 = new SQLquery(delRoleQuery2, [roleDelTit, departName_ID_Arr[0].department_id])
+                        delInstance2.delete(startUp);
+                    })
+                })
+
+            } else {
+                const delRoleQuery = "DELETE FROM role WHERE role.id = (?);"
+                const delInstance = new SQLquery(delRoleQuery, roleDelID);
+                delInstance.delete(startUp);
+            }
+        })
+    })
+}
+
+
+function addDep(depNameArr) {
+
+    const whatDep = new InquirerFunctions(inqSel[0], 'dep_to_add', questions.newDep)
+
+    inquirer.prompt([whatDep.ask()]).then(userChoice => {
+
+        const Exist = depNameArr.filter(department => {
+
+            if (department.name == userChoice.dep_to_add) return true;
+        })
+
+        if (Exist.length >= 1) {
+            console.log("Duplicate Department!")
+            startUp();
+        } else {
+            const addDepQuery = `INSERT INTO department (department.name) VALUES (?);`
+            const addDep = new SQLquery(addDepQuery, userChoice.dep_to_add);
+
+            addDep.update(startUp, "Department added!");
+        }
     })
 }
