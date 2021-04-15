@@ -16,5 +16,10 @@
   "bugs": {
     "url": "https://github.com/Amarz94/EmployeeManagementSys/issues"
   },
-  "homepage": "https://github.com/Amarz94/EmployeeManagementSys#readme"
+  "homepage": "https://github.com/Amarz94/EmployeeManagementSys#readme",
+  "dependencies": {
+    "console.table": "^0.10.0",
+    "inquirer": "^8.0.0",
+    "mysql": "^2.18.1"
+  }
 }
