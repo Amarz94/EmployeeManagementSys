@@ -2,11 +2,7 @@ const { prompt } = require("inquirer");
 const db = require("./db");
 require("console.table");
 
-init()
-
-function init() {
-  startUp();
-}
+startUp();
 
 async function startUp () {
     const { choice } = await prompt([
@@ -81,7 +77,7 @@ async function startUp () {
         case "VIEW_EMPLOYEES_BY_DEPARTMENT":
             return viewEmpByDepart();
         case "VIEW_EMPLOYEES_BY_MANAGER":
-            return viewEmpByManager();
+            return viewEmpByMan();
         case "ADD_EMPLOYEE":
             return addEmp();
         case "REMOVE_EMPLOYEE":
@@ -139,8 +135,8 @@ async function startUp () {
           startUp();
     }
 
-    async function viewEmpByManager() {
-        const managers = await db.findAllEmps();
+    async function viewEmpByMan() {
+        const managers = await db.findAllEmp();
       
         const managerChoices = managers.map(({ id, first_name, last_name }) => ({
           name: `${first_name} ${last_name}`,
@@ -176,11 +172,11 @@ async function startUp () {
         const employee = await prompt([
           {
             name: "first_name",
-            message: "What is the employee's first name?"
+            message: "What is their first name?"
           },
           {
             name: "last_name",
-            message: "What is the employee's last name?"
+            message: "What is their last name?"
           }
         ]);
       
@@ -192,7 +188,7 @@ async function startUp () {
         const { roleId } = await prompt({
           type: "list",
           name: "roleId",
-          message: "What is the employee's role?",
+          message: "What is their role?",
           choices: roleChoices
         });
       
@@ -225,7 +221,7 @@ async function startUp () {
     async function removeEmp() {
         const employees = await db.findAllEmp();
       
-        const employeeChoices = employees.map(({ id, first_name, last_name }) => ({
+        const empChoices = employees.map(({ id, first_name, last_name }) => ({
           name: `${first_name} ${last_name}`,
           value: id
         }));
@@ -234,14 +230,14 @@ async function startUp () {
           {
             type: "list",
             name: "employeeId",
-            message: "Which employee do you want to remove?",
-            choices: employeeChoices
+            message: "Which employee do you want to removed?",
+            choices: empChoices
           }
         ]);
       
         await db.removeEmp(employeeId);
       
-        console.log("Removed employee from the database");
+        console.log("Removed selected employee");
       
         startUp();
     }
@@ -249,7 +245,7 @@ async function startUp () {
     async function updateEmpRole() {
         const employees = await db.findAllEmp();
       
-        const employeeChoices = employees.map(({ id, first_name, last_name }) => ({
+        const empChoices = employees.map(({ id, first_name, last_name }) => ({
           name: `${first_name} ${last_name}`,
           value: id
         }));
@@ -259,7 +255,7 @@ async function startUp () {
             type: "list",
             name: "employeeId",
             message: "Which employee's role do you want to update?",
-            choices: employeeChoices
+            choices: empChoices
           }
         ]);
       
@@ -289,7 +285,7 @@ async function startUp () {
     async function updateEmpMan() {
         const employees = await db.findAllEmp();
       
-        const employeeChoices = employees.map(({ id, first_name, last_name }) => ({
+        const empChoices = employees.map(({ id, first_name, last_name }) => ({
           name: `${first_name} ${last_name}`,
           value: id
         }));
@@ -299,7 +295,7 @@ async function startUp () {
             type: "list",
             name: "employeeId",
             message: "Which employee's manager do you want to update?",
-            choices: employeeChoices
+            choices: empChoices
           }
         ]);
       
@@ -403,7 +399,7 @@ async function startUp () {
           {
             type: "list",
             name: "department_id",
-            message: "Which department does the role belong to?",
+            message: "Which department do you want to assign the role?",
             choices: departmentChoices
           }
         ]);
@@ -428,14 +424,14 @@ async function startUp () {
             type: "list",
             name: "roleId",
             message:
-              "Which role do you want to remove? (Warning: This will also remove employees)",
+              "Which role to be removed? (Warning: This will also remove employees)",
             choices: roleChoices
           }
         ]);
       
         await db.removeRole(roleId);
       
-        console.log("Removed role from the database");
+        console.log("Removed role");
       
         startUp();
     }
